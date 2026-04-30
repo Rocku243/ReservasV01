@@ -16,6 +16,9 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nombre, setNombre] = useState("");
+  const [celular, setCelular] = useState("");
+  const [placa, setPlaca] = useState("");
+  const [tipoCargador, setTipoCargador] = useState<"Tipo 1" | "Tipo 2">("Tipo 2");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
