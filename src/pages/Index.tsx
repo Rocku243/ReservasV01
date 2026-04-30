@@ -13,6 +13,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [conectores, setConectores] = useState<Conector[]>([]);
   const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) navigate("/auth");
@@ -20,11 +21,18 @@ const Index = () => {
 
   useEffect(() => {
     const fetchConectores = async () => {
-      const { data, error } = await supabase
+      setCargando(true);
+      setError(null);
+      const { data, error: dbError } = await supabase
         .from("conectores")
         .select("*")
         .order("numero", { ascending: true });
-      if (!error && data) setConectores(data as Conector[]);
+      if (dbError) {
+        console.error("Error cargando conectores:", dbError);
+        setError(dbError.message);
+      } else if (data) {
+        setConectores(data as Conector[]);
+      }
       setCargando(false);
     };
     if (user) fetchConectores();
