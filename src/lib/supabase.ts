@@ -20,6 +20,14 @@ export type Conector = {
   estado: string | null;
 };
 
+export type Perfil = {
+  id: string;
+  nombre: string;
+  celular: string;
+  placa: string;
+  tipo_cargador: "Tipo 1" | "Tipo 2";
+};
+
 export type Reserva = {
   id: number;
   conector_id: number;
