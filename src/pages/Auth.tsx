@@ -39,18 +39,41 @@ const Auth = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!nombre.trim() || !celular.trim() || !placa.trim()) {
+      toast.error("Completa todos los campos");
+      return;
+    }
     setSubmitting(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { nombre },
+        data: { nombre, celular, placa, tipo_cargador: tipoCargador },
       },
     });
+    if (error) {
+      setSubmitting(false);
+      toast.error(error.message);
+      return;
+    }
+    const userId = data.user?.id;
+    if (userId) {
+      const { error: perfilError } = await supabase.from("perfiles").upsert({
+        id: userId,
+        nombre: nombre.trim(),
+        celular: celular.trim(),
+        placa: placa.trim().toUpperCase(),
+        tipo_cargador: tipoCargador,
+      });
+      if (perfilError) {
+        setSubmitting(false);
+        toast.error("Cuenta creada, pero no se guardó el perfil: " + perfilError.message);
+        return;
+      }
+    }
     setSubmitting(false);
-    if (error) toast.error(error.message);
-    else toast.success("Cuenta creada. Revisa tu correo si se requiere confirmación.");
+    toast.success("Cuenta creada. Revisa tu correo si se requiere confirmación.");
   };
 
   return (
