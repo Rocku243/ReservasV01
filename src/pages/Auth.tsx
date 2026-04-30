@@ -116,6 +116,26 @@ const Auth = () => {
                   <Input id="nombre" required value={nombre} onChange={(e) => setNombre(e.target.value)} />
                 </div>
                 <div>
+                  <Label htmlFor="celular">Número de celular</Label>
+                  <Input id="celular" type="tel" required value={celular} onChange={(e) => setCelular(e.target.value)} />
+                </div>
+                <div>
+                  <Label htmlFor="placa">Placa del vehículo</Label>
+                  <Input id="placa" required value={placa} onChange={(e) => setPlaca(e.target.value)} placeholder="ABC123" />
+                </div>
+                <div>
+                  <Label htmlFor="tipo">Tipo de cargador de tu carro</Label>
+                  <select
+                    id="tipo"
+                    value={tipoCargador}
+                    onChange={(e) => setTipoCargador(e.target.value as "Tipo 1" | "Tipo 2")}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="Tipo 1">Tipo 1</option>
+                    <option value="Tipo 2">Tipo 2</option>
+                  </select>
+                </div>
+                <div>
                   <Label htmlFor="email-s">Correo electrónico</Label>
                   <Input id="email-s" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
