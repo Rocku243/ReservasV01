@@ -1,16 +1,93 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase, Conector } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
+import { Layout } from "@/components/Layout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Zap, MapPin, Plug } from "lucide-react";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const Index = () => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const [conectores, setConectores] = useState<Conector[]>([]);
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    if (!loading && !user) navigate("/auth");
+  }, [user, loading, navigate]);
+
+  useEffect(() => {
+    const fetchConectores = async () => {
+      const { data, error } = await supabase
+        .from("conectores")
+        .select("*")
+        .order("numero", { ascending: true });
+      if (!error && data) setConectores(data as Conector[]);
+      setCargando(false);
+    };
+    if (user) fetchConectores();
+  }, [user]);
+
+  if (loading || !user) return null;
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
-    </div>
+    <Layout>
+      <div className="space-y-8">
+        <section className="bg-gradient-primary rounded-2xl p-8 text-primary-foreground shadow-elegant">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">
+            Hola, {user.user_metadata?.nombre || user.email?.split("@")[0]} 👋
+          </h1>
+          <p className="opacity-90 max-w-xl">
+            Reserva uno de los 8 cargadores disponibles en el Edificio Inteligente EPM.
+            Las reservas abren cada viernes a las 2:00 p.m. para la semana siguiente.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Cargadores disponibles</h2>
+          {cargando ? (
+            <p className="text-muted-foreground">Cargando...</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {conectores.map((c) => {
+                const activo = (c.estado ?? "activo").toLowerCase() === "activo";
+                return (
+                  <Card key={c.id} className="shadow-card hover:shadow-elegant transition-shadow">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="bg-accent p-2.5 rounded-lg">
+                          <Zap className="h-5 w-5 text-primary" />
+                        </div>
+                        <Badge variant={activo ? "default" : "secondary"} className={activo ? "bg-primary" : ""}>
+                          {activo ? "Activo" : c.estado}
+                        </Badge>
+                      </div>
+                      <CardTitle className="text-xl">Cargador #{c.numero}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="text-sm text-muted-foreground space-y-1">
+                        <div className="flex items-center gap-1.5">
+                          <Plug className="h-3.5 w-3.5" /> {c.tipo || "Tipo 2"}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <MapPin className="h-3.5 w-3.5" /> Edif. Inteligente
+                        </div>
+                      </div>
+                      <Button asChild className="w-full" disabled={!activo}>
+                        <Link to={`/reservar/${c.id}`}>Reservar</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      </div>
+    </Layout>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
