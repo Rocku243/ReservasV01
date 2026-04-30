@@ -93,6 +93,10 @@ const Reservar = () => {
 
   const confirmar = async () => {
     if (!seleccion || !user) return;
+    if (reservaUsuarioSemana) {
+      toast.error("Ya tienes una reserva activa esta semana. Cancélala primero para hacer una nueva.");
+      return;
+    }
     if (!nombre.trim()) {
       toast.error("Por favor ingresa tu nombre");
       return;
@@ -140,6 +144,11 @@ const Reservar = () => {
                 Por ahora puedes ver la semana en curso.
               </div>
             )}
+            {reservaUsuarioSemana && (
+              <div className="bg-destructive/10 text-destructive rounded-lg p-3 mb-4 text-sm border border-destructive/30">
+                Ya tienes una reserva activa esta semana. Cancélala primero para hacer una nueva.
+              </div>
+            )}
             <p className="text-sm font-medium mb-3">
               Semana: {format(dias[0], "d MMM", { locale: es })} — {format(dias[6], "d MMM yyyy", { locale: es })}
             </p>
@@ -160,21 +169,25 @@ const Reservar = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       {(["mañana", "tarde"] as Bloque[]).map((b) => {
-                        const ocupado = estaReservado(fechaStr, b);
+                        const reservaOcup = estaReservado(fechaStr, b);
+                        const ocupado = !!reservaOcup;
                         const seleccionado =
                           seleccion?.fecha === fechaStr && seleccion?.bloque === b;
+                        const nombreOcup = reservaOcup
+                          ? nombresPorEmail[reservaOcup.usuario_email] || reservaOcup.usuario_nombre
+                          : null;
                         return (
                           <button
                             key={b}
-                            disabled={ocupado}
+                            disabled={ocupado || !!reservaUsuarioSemana}
                             onClick={() => setSeleccion({ fecha: fechaStr, bloque: b })}
                             className={`relative rounded-lg border-2 p-3 text-left transition-all ${
                               ocupado
-                                ? "bg-muted border-border opacity-60 cursor-not-allowed"
+                                ? "bg-muted border-border opacity-70 cursor-not-allowed"
                                 : seleccionado
                                 ? "border-primary bg-accent shadow-card"
                                 : "border-border hover:border-primary/50"
-                            }`}
+                            } ${reservaUsuarioSemana && !ocupado ? "opacity-50 cursor-not-allowed" : ""}`}
                           >
                             <div className="flex items-center gap-2">
                               {b === "mañana" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -185,7 +198,9 @@ const Reservar = () => {
                               {b === "mañana" ? "6:00 a.m. — 12:00 p.m." : "12:00 p.m. — 6:00 p.m."}
                             </div>
                             {ocupado && (
-                              <Badge variant="secondary" className="mt-2 text-xs">No disponible</Badge>
+                              <Badge variant="secondary" className="mt-2 text-xs">
+                                Reservado por {nombreOcup}
+                              </Badge>
                             )}
                           </button>
                         );
