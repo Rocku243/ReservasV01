@@ -57,6 +57,16 @@ const Index = () => {
           <h2 className="text-2xl font-bold mb-4">Cargadores disponibles</h2>
           {cargando ? (
             <p className="text-muted-foreground">Cargando...</p>
+          ) : error ? (
+            <Card className="p-6 border-destructive/50 bg-destructive/5">
+              <p className="font-semibold text-destructive mb-2">No se pudieron cargar los cargadores</p>
+              <p className="text-sm text-muted-foreground mb-2">{error}</p>
+              <p className="text-sm">
+                Ejecuta en el SQL Editor de Supabase: <code className="bg-muted px-1 rounded">GRANT SELECT ON public.conectores TO authenticated;</code> y crea una política RLS de SELECT para el rol <code>authenticated</code>.
+              </p>
+            </Card>
+          ) : conectores.length === 0 ? (
+            <p className="text-muted-foreground">No hay cargadores registrados.</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {conectores.map((c) => {
