@@ -134,7 +134,7 @@ const Reservar = () => {
               Reservar Cargador #{conector?.numero ?? "..."}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              {conector?.tipo || "Tipo 2"} · Edificio Inteligente EPM
+              {conector?.tipo ?? "—"} · Edificio Inteligente EPM
             </p>
           </CardHeader>
           <CardContent>
