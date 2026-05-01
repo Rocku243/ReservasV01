@@ -15,7 +15,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 export type Conector = {
   id: number;
   numero: number;
-  tipo: string | null;
+  tipo_conector: string | null;
   ubicacion: string | null;
   estado: string | null;
 };
