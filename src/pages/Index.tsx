@@ -74,6 +74,15 @@ const Index = () => {
           </p>
         </section>
 
+        {!ventana && (
+          <div className="flex items-start gap-3 rounded-xl border border-primary/30 bg-accent p-4">
+            <Clock className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+            <p className="text-sm text-foreground">
+              Las reservas para la próxima semana abren este viernes a las 2:00 p.m.
+            </p>
+          </div>
+        )}
+
         <section>
           <h2 className="text-2xl font-bold mb-4">Cargadores disponibles</h2>
           {cargando ? (
@@ -92,6 +101,9 @@ const Index = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {conectores.map((c) => {
                 const activo = (c.estado ?? "activo").toLowerCase() === "activo";
+                const ocupados = ocupadosPorConector[c.id] || 0;
+                const disponibles = Math.max(0, TOTAL_TURNOS - ocupados);
+                const sinCupos = disponibles <= 0;
                 return (
                   <Card key={c.id} className="shadow-card hover:shadow-elegant transition-shadow">
                     <CardHeader className="pb-3">
@@ -108,13 +120,18 @@ const Index = () => {
                     <CardContent className="space-y-3">
                       <div className="text-sm text-muted-foreground space-y-1">
                         <div className="flex items-center gap-1.5">
-                          <Plug className="h-3.5 w-3.5" /> {c.tipo || "Tipo 2"}
+                          <Plug className="h-3.5 w-3.5" /> {c.tipo ?? "—"}
                         </div>
                         <div className="flex items-center gap-1.5">
                           <MapPin className="h-3.5 w-3.5" /> Edif. Inteligente
                         </div>
                       </div>
-                      <Button asChild className="w-full" disabled={!activo}>
+                      <p className={`text-sm font-semibold ${sinCupos ? "text-destructive" : "text-primary"}`}>
+                        {sinCupos
+                          ? "0 de 14 disponibles · Sin cupos"
+                          : `${disponibles} de ${TOTAL_TURNOS} disponibles`}
+                      </p>
+                      <Button asChild className="w-full" disabled={!activo || sinCupos}>
                         <Link to={`/reservar/${c.id}`}>Reservar</Link>
                       </Button>
                     </CardContent>
