@@ -181,12 +181,21 @@ const Reservar = () => {
                             key={b}
                             disabled={ocupado || !!reservaUsuarioSemana}
                             onClick={() => setSeleccion({ fecha: fechaStr, bloque: b })}
+                            style={
+                              ocupado
+                                ? {
+                                    backgroundColor: "#FFE5E5",
+                                    color: "#CC0000",
+                                    borderColor: "#FF0000",
+                                  }
+                                : undefined
+                            }
                             className={`relative rounded-lg border-2 p-3 text-left transition-all ${
                               ocupado
-                                ? "bg-muted border-border opacity-70 cursor-not-allowed"
+                                ? "cursor-not-allowed"
                                 : seleccionado
                                 ? "border-primary bg-accent shadow-card"
-                                : "border-border hover:border-primary/50"
+                                : "border-border hover:border-primary/50 bg-card"
                             } ${reservaUsuarioSemana && !ocupado ? "opacity-50 cursor-not-allowed" : ""}`}
                           >
                             <div className="flex items-center gap-2">
@@ -194,13 +203,19 @@ const Reservar = () => {
                               <span className="font-medium capitalize">{b}</span>
                               {seleccionado && <Check className="h-4 w-4 text-primary ml-auto" />}
                             </div>
-                            <div className="text-xs text-muted-foreground mt-1">
+                            <div
+                              className={`text-xs mt-1 ${ocupado ? "" : "text-muted-foreground"}`}
+                              style={ocupado ? { color: "#CC0000" } : undefined}
+                            >
                               {b === "mañana" ? "6:00 a.m. — 12:00 p.m." : "12:00 p.m. — 6:00 p.m."}
                             </div>
                             {ocupado && (
-                              <Badge variant="secondary" className="mt-2 text-xs">
+                              <div
+                                className="mt-2 text-xs font-semibold"
+                                style={{ color: "#CC0000" }}
+                              >
                                 Reservado por {nombreOcup}
-                              </Badge>
+                              </div>
                             )}
                           </button>
                         );
