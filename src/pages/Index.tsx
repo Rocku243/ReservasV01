@@ -120,7 +120,7 @@ const Index = () => {
                     <CardContent className="space-y-3">
                       <div className="text-sm text-muted-foreground space-y-1">
                         <div className="flex items-center gap-1.5">
-                          <Plug className="h-3.5 w-3.5" /> {c.tipo ?? "—"}
+                          <Plug className="h-3.5 w-3.5" /> {c.tipo_conector ?? "—"}
                         </div>
                         <div className="flex items-center gap-1.5">
                           <MapPin className="h-3.5 w-3.5" /> Edif. Inteligente
