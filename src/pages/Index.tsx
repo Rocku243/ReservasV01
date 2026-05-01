@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase, Conector } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -6,14 +6,21 @@ import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Zap, MapPin, Plug } from "lucide-react";
+import { Zap, MapPin, Plug, Clock } from "lucide-react";
+import { getSemanaReservable, formatFecha, ventanaAbierta } from "@/lib/reservas";
+
+const TOTAL_TURNOS = 14; // 7 días × 2 bloques
 
 const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [conectores, setConectores] = useState<Conector[]>([]);
+  const [ocupadosPorConector, setOcupadosPorConector] = useState<Record<number, number>>({});
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const dias = useMemo(() => getSemanaReservable(), []);
+  const ventana = ventanaAbierta();
 
   useEffect(() => {
     if (!loading && !user) navigate("/auth");
@@ -32,11 +39,25 @@ const Index = () => {
         setError(dbError.message);
       } else if (data) {
         setConectores(data as Conector[]);
+        // Contar reservas activas de la semana por conector
+        const inicio = formatFecha(dias[0]);
+        const fin = formatFecha(dias[6]);
+        const { data: reservas } = await supabase
+          .from("reservas")
+          .select("conector_id")
+          .eq("estado", "activa")
+          .gte("fecha", inicio)
+          .lte("fecha", fin);
+        const counts: Record<number, number> = {};
+        (reservas || []).forEach((r: { conector_id: number }) => {
+          counts[r.conector_id] = (counts[r.conector_id] || 0) + 1;
+        });
+        setOcupadosPorConector(counts);
       }
       setCargando(false);
     };
     if (user) fetchConectores();
-  }, [user]);
+  }, [user, dias]);
 
   if (loading || !user) return null;
 
