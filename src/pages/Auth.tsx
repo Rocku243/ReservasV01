@@ -54,10 +54,13 @@ const Auth = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nombre.trim() || !celular.trim() || !placa.trim()) {
+    if (!nombre.trim()) {
       toast.error("Completa todos los campos");
       return;
     }
+    const v = validateSignup();
+    setErrors(v);
+    if (Object.keys(v).length > 0) return;
     setSubmitting(true);
     const perfilData = {
       nombre: nombre.trim(),
