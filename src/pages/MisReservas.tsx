@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Calendar, Sun, Moon, Zap } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { getSemanaReservable, formatFecha } from "@/lib/reservas";
 
 type ReservaConConector = Reserva & { conectores?: Conector };
 
@@ -26,11 +27,16 @@ const MisReservas = () => {
   const cargar = async () => {
     if (!user?.email) return;
     setCargando(true);
+    const dias = getSemanaReservable();
+    const inicio = formatFecha(dias[0]);
+    const fin = formatFecha(dias[6]);
     const { data } = await supabase
       .from("reservas")
       .select("*, conectores(*)")
       .eq("usuario_email", user.email)
       .eq("estado", "activa")
+      .gte("fecha", inicio)
+      .lte("fecha", fin)
       .order("fecha", { ascending: true });
     if (data) setReservas(data as ReservaConConector[]);
     setCargando(false);
