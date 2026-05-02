@@ -22,7 +22,7 @@ const Auth = () => {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; celular?: string; placa?: string }>({});
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   const celularRegex = /^3\d{9}$/;
   const placaRegex = /^[A-Z]{3}\d{3}$/;
 
