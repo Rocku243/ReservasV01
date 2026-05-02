@@ -148,11 +148,35 @@ const Auth = () => {
                 </div>
                 <div>
                   <Label htmlFor="celular">Número de celular</Label>
-                  <Input id="celular" type="tel" required value={celular} onChange={(e) => setCelular(e.target.value)} />
+                  <Input
+                    id="celular"
+                    type="tel"
+                    inputMode="numeric"
+                    maxLength={10}
+                    required
+                    value={celular}
+                    onChange={(e) => {
+                      setCelular(e.target.value.replace(/\D/g, "").slice(0, 10));
+                      if (errors.celular) setErrors((p) => ({ ...p, celular: undefined }));
+                    }}
+                    placeholder="3001234567"
+                  />
+                  {errors.celular && <p className="text-sm text-destructive mt-1">{errors.celular}</p>}
                 </div>
                 <div>
                   <Label htmlFor="placa">Placa del vehículo</Label>
-                  <Input id="placa" required value={placa} onChange={(e) => setPlaca(e.target.value)} placeholder="ABC123" />
+                  <Input
+                    id="placa"
+                    required
+                    maxLength={6}
+                    value={placa}
+                    onChange={(e) => {
+                      setPlaca(e.target.value.toUpperCase().slice(0, 6));
+                      if (errors.placa) setErrors((p) => ({ ...p, placa: undefined }));
+                    }}
+                    placeholder="ABC123"
+                  />
+                  {errors.placa && <p className="text-sm text-destructive mt-1">{errors.placa}</p>}
                 </div>
                 <div>
                   <Label htmlFor="tipo">Tipo de cargador de tu carro</Label>
