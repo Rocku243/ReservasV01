@@ -44,12 +44,20 @@ const Auth = () => {
       return;
     }
     setSubmitting(true);
+    const perfilData = {
+      nombre: nombre.trim(),
+      celular: celular.trim(),
+      placa: placa.trim().toUpperCase(),
+      tipo_cargador: tipoCargador,
+    };
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { nombre, celular, placa, tipo_cargador: tipoCargador },
+        // Guardamos los datos del perfil en metadata para que el listener
+        // SIGNED_IN cree el registro en `perfiles` con la sesión activa.
+        data: perfilData,
       },
     });
     if (error) {
@@ -57,23 +65,28 @@ const Auth = () => {
       toast.error(error.message);
       return;
     }
-    const userId = data.user?.id;
-    if (userId) {
-      const { error: perfilError } = await supabase.from("perfiles").upsert({
-        id: userId,
-        nombre: nombre.trim(),
-        celular: celular.trim(),
-        placa: placa.trim().toUpperCase(),
-        tipo_cargador: tipoCargador,
-      });
+
+    // Si Supabase devolvió sesión inmediata (auto-confirm activo),
+    // intentamos crear el perfil ahora mismo.
+    if (data.session?.user) {
+      const userId = data.session.user.id;
+      const { error: perfilError } = await supabase
+        .from("perfiles")
+        .upsert({ id: userId, ...perfilData });
+      setSubmitting(false);
       if (perfilError) {
-        setSubmitting(false);
         toast.error("Cuenta creada, pero no se guardó el perfil: " + perfilError.message);
         return;
       }
+      toast.success("¡Cuenta creada!");
+      navigate("/");
+      return;
     }
+
+    // Sin sesión: requiere confirmación por email. El perfil se creará
+    // automáticamente en el primer login (listener SIGNED_IN).
     setSubmitting(false);
-    toast.success("Cuenta creada. Revisa tu correo si se requiere confirmación.");
+    toast.success("Cuenta creada. Revisa tu correo para confirmar y luego inicia sesión.");
   };
 
   return (
