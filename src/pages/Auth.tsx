@@ -192,7 +192,17 @@ const Auth = () => {
                 </div>
                 <div>
                   <Label htmlFor="email-s">Correo electrónico</Label>
-                  <Input id="email-s" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <Input
+                    id="email-s"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (errors.email) setErrors((p) => ({ ...p, email: undefined }));
+                    }}
+                  />
+                  {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
                 </div>
                 <div>
                   <Label htmlFor="password-s">Contraseña</Label>
