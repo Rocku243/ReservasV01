@@ -20,6 +20,21 @@ const Auth = () => {
   const [placa, setPlaca] = useState("");
   const [tipoCargador, setTipoCargador] = useState<"Tipo 1" | "Tipo 2">("Tipo 2");
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; celular?: string; placa?: string }>({});
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const celularRegex = /^3\d{9}$/;
+  const placaRegex = /^[A-Z]{3}\d{3}$/;
+
+  const validateSignup = () => {
+    const e: { email?: string; celular?: string; placa?: string } = {};
+    if (!emailRegex.test(email.trim())) e.email = "Ingresa un correo electrónico válido";
+    if (!celularRegex.test(celular.trim()))
+      e.celular = "Ingresa un número de celular válido (10 dígitos, debe comenzar por 3)";
+    if (!placaRegex.test(placa.trim().toUpperCase()))
+      e.placa = "Ingresa una placa válida (formato: ABC123)";
+    return e;
+  };
 
   useEffect(() => {
     if (!loading && user) navigate("/");
@@ -39,10 +54,13 @@ const Auth = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nombre.trim() || !celular.trim() || !placa.trim()) {
+    if (!nombre.trim()) {
       toast.error("Completa todos los campos");
       return;
     }
+    const v = validateSignup();
+    setErrors(v);
+    if (Object.keys(v).length > 0) return;
     setSubmitting(true);
     const perfilData = {
       nombre: nombre.trim(),
@@ -130,11 +148,35 @@ const Auth = () => {
                 </div>
                 <div>
                   <Label htmlFor="celular">Número de celular</Label>
-                  <Input id="celular" type="tel" required value={celular} onChange={(e) => setCelular(e.target.value)} />
+                  <Input
+                    id="celular"
+                    type="tel"
+                    inputMode="numeric"
+                    maxLength={10}
+                    required
+                    value={celular}
+                    onChange={(e) => {
+                      setCelular(e.target.value.replace(/\D/g, "").slice(0, 10));
+                      if (errors.celular) setErrors((p) => ({ ...p, celular: undefined }));
+                    }}
+                    placeholder="3001234567"
+                  />
+                  {errors.celular && <p className="text-sm text-destructive mt-1">{errors.celular}</p>}
                 </div>
                 <div>
                   <Label htmlFor="placa">Placa del vehículo</Label>
-                  <Input id="placa" required value={placa} onChange={(e) => setPlaca(e.target.value)} placeholder="ABC123" />
+                  <Input
+                    id="placa"
+                    required
+                    maxLength={6}
+                    value={placa}
+                    onChange={(e) => {
+                      setPlaca(e.target.value.toUpperCase().slice(0, 6));
+                      if (errors.placa) setErrors((p) => ({ ...p, placa: undefined }));
+                    }}
+                    placeholder="ABC123"
+                  />
+                  {errors.placa && <p className="text-sm text-destructive mt-1">{errors.placa}</p>}
                 </div>
                 <div>
                   <Label htmlFor="tipo">Tipo de cargador de tu carro</Label>
@@ -150,7 +192,17 @@ const Auth = () => {
                 </div>
                 <div>
                   <Label htmlFor="email-s">Correo electrónico</Label>
-                  <Input id="email-s" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <Input
+                    id="email-s"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (errors.email) setErrors((p) => ({ ...p, email: undefined }));
+                    }}
+                  />
+                  {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
                 </div>
                 <div>
                   <Label htmlFor="password-s">Contraseña</Label>
