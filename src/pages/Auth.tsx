@@ -20,6 +20,21 @@ const Auth = () => {
   const [placa, setPlaca] = useState("");
   const [tipoCargador, setTipoCargador] = useState<"Tipo 1" | "Tipo 2">("Tipo 2");
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; celular?: string; placa?: string }>({});
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const celularRegex = /^3\d{9}$/;
+  const placaRegex = /^[A-Z]{3}\d{3}$/;
+
+  const validateSignup = () => {
+    const e: { email?: string; celular?: string; placa?: string } = {};
+    if (!emailRegex.test(email.trim())) e.email = "Ingresa un correo electrónico válido";
+    if (!celularRegex.test(celular.trim()))
+      e.celular = "Ingresa un número de celular válido (10 dígitos, debe comenzar por 3)";
+    if (!placaRegex.test(placa.trim().toUpperCase()))
+      e.placa = "Ingresa una placa válida (formato: ABC123)";
+    return e;
+  };
 
   useEffect(() => {
     if (!loading && user) navigate("/");
