@@ -22,9 +22,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
       setUser(s?.user ?? null);
+
+      // Asegurar que el perfil exista cuando el usuario tiene sesión activa.
+      // Se hace aquí (no en el signup) porque si hay confirmación de email
+      // requerida, durante signUp aún no hay sesión y RLS bloquea el insert.
+      if (event === "SIGNED_IN" && s?.user) {
+        const u = s.user;
+        const meta = (u.user_metadata ?? {}) as Record<string, string>;
+        if (meta.nombre || meta.celular || meta.placa || meta.tipo_cargador) {
+          // Defer para no bloquear el callback de auth
+          setTimeout(async () => {
+            const { data: existing } = await supabase
+              .from("perfiles")
+              .select("id")
+              .eq("id", u.id)
+              .maybeSingle();
+            if (!existing) {
+              await supabase.from("perfiles").upsert({
+                id: u.id,
+                nombre: meta.nombre ?? "",
+                celular: meta.celular ?? "",
+                placa: (meta.placa ?? "").toUpperCase(),
+                tipo_cargador: meta.tipo_cargador ?? "Tipo 2",
+              });
+            }
+          }, 0);
+        }
+      }
     });
 
     supabase.auth.getSession().then(({ data: { session: s } }) => {
