@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Zap, LogOut, CalendarCheck, Home } from "lucide-react";
+import { Zap, LogOut, CalendarCheck, Home, Users } from "lucide-react";
 
 export const Layout = ({ children }: { children: ReactNode }) => {
   const { user, signOut } = useAuth();
@@ -49,6 +49,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
             <nav className="flex items-center gap-2">
               <NavItem to="/" icon={Home} label="Inicio" />
               <NavItem to="/mis-reservas" icon={CalendarCheck} label="Mis reservas" />
+              <NavItem to="/usuarios" icon={Users} label="Usuarios" />
               <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2">
                 <LogOut className="h-4 w-4" />
                 <span className="hidden sm:inline">Salir</span>

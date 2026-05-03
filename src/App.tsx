@@ -8,6 +8,7 @@ import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth.tsx";
 import Reservar from "./pages/Reservar.tsx";
 import MisReservas from "./pages/MisReservas.tsx";
+import Usuarios from "./pages/Usuarios.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/reservar/:id" element={<Reservar />} />
             <Route path="/mis-reservas" element={<MisReservas />} />
+            <Route path="/usuarios" element={<Usuarios />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
