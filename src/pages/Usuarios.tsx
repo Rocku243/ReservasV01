@@ -57,6 +57,7 @@ export default function Usuarios() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>#</TableHead>
                       <TableHead>Nombre completo</TableHead>
                       <TableHead>Celular</TableHead>
                       <TableHead>Placa</TableHead>
@@ -64,8 +65,9 @@ export default function Usuarios() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {perfiles.map((p) => (
+                    {perfiles.map((p, index) => (
                       <TableRow key={p.id}>
+                        <TableCell className="text-muted-foreground">{index + 1}</TableCell>
                         <TableCell className="font-medium">{p.nombre || "—"}</TableCell>
                         <TableCell>{p.celular || "—"}</TableCell>
                         <TableCell className="uppercase">{p.placa || "—"}</TableCell>
