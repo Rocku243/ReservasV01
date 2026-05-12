@@ -28,8 +28,8 @@ const App = () => (
             <Route path="/reservar/:id" element={<Reservar />} />
             <Route path="/mis-reservas" element={<MisReservas />} />
             <Route path="/usuarios" element={<Usuarios />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/has-olvidado-tu-contrasena" element={<ForgotPassword />} />
+            <Route path="/restablecer-contrasena" element={<ResetPassword />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
