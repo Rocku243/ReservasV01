@@ -140,7 +140,7 @@ const Auth = () => {
                 <div className="text-center">
                   <button
                     type="button"
-                    onClick={() => navigate("/forgot-password")}
+                    onClick={() => navigate("/has-olvidado-tu-contrasena")}
                     className="text-sm text-primary hover:underline"
                   >
                     ¿Olvidaste tu contraseña?
