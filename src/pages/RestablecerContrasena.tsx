@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { Zap } from "lucide-react";
 
-const ResetPassword = () => {
+const RestablecerContrasena = () => {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -20,13 +20,10 @@ const ResetPassword = () => {
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") setReady(true);
     });
-    // Si la sesión ya está activa al cargar (tras el redirect), permitir
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) setReady(true);
     });
-    return () => {
-      data.subscription.unsubscribe();
-    };
+    return () => data.subscription.unsubscribe();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,7 +45,7 @@ const ResetPassword = () => {
       toast.error(updErr.message);
       return;
     }
-    toast.success("Contraseña actualizada. Iniciá sesión nuevamente.");
+    toast.success("Contraseña actualizada. Inicia sesión nuevamente.");
     await supabase.auth.signOut();
     navigate("/auth");
   };
@@ -61,7 +58,7 @@ const ResetPassword = () => {
             <Zap className="h-7 w-7 text-primary-foreground" />
           </div>
           <CardTitle className="text-2xl">Nueva contraseña</CardTitle>
-          <CardDescription>Ingresá tu nueva contraseña</CardDescription>
+          <CardDescription>Ingresa tu nueva contraseña</CardDescription>
         </CardHeader>
         <CardContent>
           {!ready ? (
@@ -104,4 +101,4 @@ const ResetPassword = () => {
   );
 };
 
-export default ResetPassword;
+export default RestablecerContrasena;

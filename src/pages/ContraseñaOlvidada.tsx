@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { Zap } from "lucide-react";
 
-const ForgotPassword = () => {
+const ContrasenaOlvidada = () => {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
@@ -42,7 +42,7 @@ const ForgotPassword = () => {
           {sent ? (
             <div className="space-y-4 text-center">
               <p className="text-sm text-muted-foreground">
-              Revisa tu correo, te enviamos un enlace para restablecer tu contraseña.
+                Revisa tu correo, te enviamos un enlace para restablecer tu contraseña
               </p>
               <Button asChild variant="outline" className="w-full">
                 <Link to="/auth">Volver al inicio de sesión</Link>
@@ -74,4 +74,4 @@ const ForgotPassword = () => {
   );
 };
 
-export default ForgotPassword;
+export default ContrasenaOlvidada;
