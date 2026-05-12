@@ -17,7 +17,7 @@ const ForgotPassword = () => {
     e.preventDefault();
     setSubmitting(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: "https://reserva-cargadores-epm.lovable.app/reset-password",
+      redirectTo: "https://reserva-cargadores-epm.lovable.app/restablecer-contrasena",
     });
     setSubmitting(false);
     if (error) {
