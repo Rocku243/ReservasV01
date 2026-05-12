@@ -137,6 +137,15 @@ const Auth = () => {
                 <Button type="submit" className="w-full" disabled={submitting}>
                   {submitting ? "Ingresando..." : "Ingresar"}
                 </Button>
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => navigate("/forgot-password")}
+                    className="text-sm text-primary hover:underline"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </button>
+                </div>
               </form>
             </TabsContent>
 
