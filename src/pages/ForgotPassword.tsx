@@ -17,7 +17,7 @@ const ForgotPassword = () => {
     e.preventDefault();
     setSubmitting(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: "https://reserva-cargadores-epm.lovable.app/reset-password",
+      redirectTo: "https://reserva-cargadores-epm.lovable.app/restablecer-contrasena",
     });
     setSubmitting(false);
     if (error) {
@@ -42,7 +42,7 @@ const ForgotPassword = () => {
           {sent ? (
             <div className="space-y-4 text-center">
               <p className="text-sm text-muted-foreground">
-                Revisá tu correo, te enviamos un enlace para restablecer tu contraseña.
+              Revisa tu correo, te enviamos un enlace para restablecer tu contraseña.
               </p>
               <Button asChild variant="outline" className="w-full">
                 <Link to="/auth">Volver al inicio de sesión</Link>
