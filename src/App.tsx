@@ -9,8 +9,8 @@ import Auth from "./pages/Auth.tsx";
 import Reservar from "./pages/Reservar.tsx";
 import MisReservas from "./pages/MisReservas.tsx";
 import Usuarios from "./pages/Usuarios.tsx";
-import ForgotPassword from "./pages/ForgotPassword.tsx";
-import ResetPassword from "./pages/ResetPassword.tsx";
+import ContrasenaOlvidada from "./pages/ContraseñaOlvidada.tsx";
+import RestablecerContrasena from "./pages/RestablecerContrasena.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -28,8 +28,8 @@ const App = () => (
             <Route path="/reservar/:id" element={<Reservar />} />
             <Route path="/mis-reservas" element={<MisReservas />} />
             <Route path="/usuarios" element={<Usuarios />} />
-            <Route path="/has-olvidado-tu-contrasena" element={<ForgotPassword />} />
-            <Route path="/restablecer-contrasena" element={<ResetPassword />} />
+            <Route path="/has-olvidado-tu-contrasena" element={<ContrasenaOlvidada />} />
+            <Route path="/restablecer-contrasena" element={<RestablecerContrasena />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
