@@ -21,18 +21,25 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/reservar/:id" element={<Reservar />} />
-            <Route path="/mis-reservas" element={<MisReservas />} />
-            <Route path="/usuarios" element={<Usuarios />} />
-            <Route path="/has-olvidado-tu-contrasena" element={<ContrasenaOlvidada />} />
-            <Route path="/restablecer-contrasena" element={<RestablecerContrasena />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
+        <Routes>
+          <Route path="/has-olvidado-tu-contrasena" element={<ContrasenaOlvidada />} />
+          <Route path="/restablecer-contrasena" element={<RestablecerContrasena />} />
+          <Route
+            path="*"
+            element={
+              <AuthProvider>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/reservar/:id" element={<Reservar />} />
+                  <Route path="/mis-reservas" element={<MisReservas />} />
+                  <Route path="/usuarios" element={<Usuarios />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </AuthProvider>
+            }
+          />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
