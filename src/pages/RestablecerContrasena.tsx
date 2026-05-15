@@ -95,9 +95,29 @@ const RestablecerContrasena = () => {
         </CardHeader>
         <CardContent>
           {!ready ? (
-            <p className="text-sm text-muted-foreground text-center">
-              Validando enlace de recuperación...
-            </p>
+            <div className="space-y-4 text-center">
+              {error ? (
+                <>
+                  <p className="text-sm text-destructive">{error}</p>
+                  <div className="flex flex-col gap-2">
+                    <Button onClick={() => window.location.reload()} className="w-full">
+                      Reintentar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate("/has-olvidado-tu-contrasena")}
+                      className="w-full"
+                    >
+                      Solicitar nuevo enlace
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Validando enlace de recuperación...
+                </p>
+              )}
+            </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
