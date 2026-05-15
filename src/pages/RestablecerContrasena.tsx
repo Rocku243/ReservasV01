@@ -17,13 +17,46 @@ const RestablecerContrasena = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") setReady(true);
+    const hash = window.location.hash || "";
+    const search = window.location.search || "";
+    const hasToken =
+      hash.includes("access_token") ||
+      hash.includes("type=recovery") ||
+      search.includes("code=") ||
+      search.includes("token=");
+
+    if (hasToken) setReady(true);
+
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (
+        event === "PASSWORD_RECOVERY" ||
+        event === "SIGNED_IN" ||
+        event === "INITIAL_SESSION" ||
+        event === "TOKEN_REFRESHED"
+      ) {
+        if (session || hasToken) setReady(true);
+      }
     });
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) setReady(true);
     });
-    return () => data.subscription.unsubscribe();
+
+    const timeoutId = window.setTimeout(() => {
+      setReady((prev) => {
+        if (!prev) {
+          setError(
+            "No pudimos validar el enlace de recuperación. Solicita uno nuevo o intenta de nuevo."
+          );
+        }
+        return prev;
+      });
+    }, 6000);
+
+    return () => {
+      data.subscription.unsubscribe();
+      window.clearTimeout(timeoutId);
+    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,9 +95,29 @@ const RestablecerContrasena = () => {
         </CardHeader>
         <CardContent>
           {!ready ? (
-            <p className="text-sm text-muted-foreground text-center">
-              Validando enlace de recuperación...
-            </p>
+            <div className="space-y-4 text-center">
+              {error ? (
+                <>
+                  <p className="text-sm text-destructive">{error}</p>
+                  <div className="flex flex-col gap-2">
+                    <Button onClick={() => window.location.reload()} className="w-full">
+                      Reintentar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate("/has-olvidado-tu-contrasena")}
+                      className="w-full"
+                    >
+                      Solicitar nuevo enlace
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Validando enlace de recuperación...
+                </p>
+              )}
+            </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
