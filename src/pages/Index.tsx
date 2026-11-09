@@ -213,7 +213,7 @@ const Index = () => {
 
   const celda = (c: Conector, b: Bloque) => {
     const base =
-      "min-h-[44px] rounded-lg border px-2.5 py-2 text-sm flex items-center justify-between gap-2 text-left";
+      "min-h-[52px] min-w-0 overflow-hidden rounded-lg border px-2 py-1.5 text-xs sm:text-sm sm:px-2.5 flex items-center justify-between gap-2 text-left";
     if (fueraDeServicio(c)) {
       return <div className={`${base} bg-muted text-muted-foreground`}>Fuera de servicio</div>;
     }
@@ -240,7 +240,7 @@ const Index = () => {
         return (
           <div className={`${base} border-destructive/40 bg-destructive/10 text-destructive`}>
             <span className="flex min-w-0 flex-col leading-tight">
-              <span className="truncate">{e.nombre}</span>
+              <span className="line-clamp-2 break-words">{e.nombre}</span>
               {e.placa && <span className="font-mono text-xs font-semibold">{e.placa}</span>}
             </span>
           </div>
@@ -256,7 +256,7 @@ const Index = () => {
         return (
           <div className={`${base} bg-muted text-muted-foreground`}>
             <span className="flex min-w-0 flex-col leading-tight">
-              <span className="truncate">{e.mia ? "Tú" : (e.nombre ?? "Sin uso")}</span>
+              <span className="line-clamp-2 break-words">{e.mia ? "Tú" : (e.nombre ?? "Sin uso")}</span>
               {!e.mia && e.placa && <span className="font-mono text-xs">{e.placa}</span>}
             </span>
           </div>
@@ -267,7 +267,7 @@ const Index = () => {
   if (loading || !user) return null;
 
   const operativos = conectores.filter((c) => !fueraDeServicio(c)).length;
-  const filas = "grid grid-cols-[72px_1fr_1fr] sm:grid-cols-[110px_1fr_1fr] gap-2";
+  const filas = "grid grid-cols-[56px_minmax(0,1fr)_minmax(0,1fr)] sm:grid-cols-[110px_minmax(0,1fr)_minmax(0,1fr)] gap-2";
 
   return (
     <Layout>
