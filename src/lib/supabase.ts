@@ -47,6 +47,7 @@ export type ReservaSemana = {
   fecha: string;
   bloque: "mañana" | "tarde";
   usuario_nombre: string;
+  placa: string | null;
   es_mia: boolean;
 };
 

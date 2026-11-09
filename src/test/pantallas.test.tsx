@@ -67,7 +67,7 @@ describe("pantalla de disponibilidad", () => {
 
   it("muestra quién reservó y el bloque en curso sigue libre si nadie lo tomó", async () => {
     reservasSemana = [
-      { id: 10, conector_id: 1, fecha: "2026-11-09", bloque: "tarde", usuario_nombre: "Ana M.", es_mia: false },
+      { id: 10, conector_id: 1, fecha: "2026-11-09", bloque: "tarde", usuario_nombre: "Ana M.", placa: "ABC123", es_mia: false },
     ];
     ui(<Index />);
     await screen.findByText("Ana M.");
@@ -77,7 +77,7 @@ describe("pantalla de disponibilidad", () => {
 
   it("si ya tengo una reserva pendiente avisa y no deja elegir otra", async () => {
     reservasSemana = [
-      { id: 11, conector_id: 2, fecha: "2026-11-12", bloque: "tarde", usuario_nombre: "Jeffer", es_mia: true },
+      { id: 11, conector_id: 2, fecha: "2026-11-12", bloque: "tarde", usuario_nombre: "Jeffer", placa: "XYZ987", es_mia: true },
     ];
     ui(<Index />);
     await screen.findByText(/Ya tienes una reserva esta semana/);
@@ -88,7 +88,7 @@ describe("pantalla de disponibilidad", () => {
 
   it("una reserva mía que ya terminó NO bloquea una nueva", async () => {
     reservasSemana = [
-      { id: 12, conector_id: 2, fecha: "2026-11-08", bloque: "mañana", usuario_nombre: "Jeffer", es_mia: true },
+      { id: 12, conector_id: 2, fecha: "2026-11-08", bloque: "mañana", usuario_nombre: "Jeffer", placa: "XYZ987", es_mia: true },
     ];
     ui(<Index />);
     await screen.findByText("#310");

@@ -28,9 +28,9 @@ type Semana = "actual" | "proxima";
 type Seleccion = { conector: Conector; fecha: string; bloque: Bloque };
 type EstadoCelda =
   | { tipo: "libre" }
-  | { tipo: "ocupado"; nombre: string }
+  | { tipo: "ocupado"; nombre: string; placa: string | null }
   | { tipo: "mia" }
-  | { tipo: "terminado"; nombre: string | null; mia: boolean };
+  | { tipo: "terminado"; nombre: string | null; placa: string | null; mia: boolean };
 
 const REFRESCO_MS = 60_000;
 
@@ -146,10 +146,10 @@ const Index = () => {
   const estadoCelda = (c: Conector, fecha: string, b: Bloque): EstadoCelda => {
     const r = mapa.get(`${c.id}|${fecha}|${b}`);
     if (bloqueTerminado(fecha, b, ahora)) {
-      return { tipo: "terminado", nombre: r ? r.usuario_nombre : null, mia: !!r?.es_mia };
+      return { tipo: "terminado", nombre: r ? r.usuario_nombre : null, placa: r?.placa ?? null, mia: !!r?.es_mia };
     }
     if (r?.es_mia) return { tipo: "mia" };
-    if (r) return { tipo: "ocupado", nombre: r.usuario_nombre };
+    if (r) return { tipo: "ocupado", nombre: r.usuario_nombre, placa: r.placa };
     return { tipo: "libre" };
   };
 
@@ -173,15 +173,11 @@ const Index = () => {
 
   const confirmar = async () => {
     if (!seleccion || !user?.email) return;
-    if (!nombre.trim()) {
-      toast.error("Ingresa tu nombre");
-      return;
-    }
     setEnviando(true);
     const { error: insError } = await supabase.from("reservas").insert({
       conector_id: seleccion.conector.id,
       usuario_email: user.email,
-      usuario_nombre: nombre.trim(),
+      usuario_nombre: nombre.trim() || user.email, // el servidor lo reemplaza por el nombre del perfil
       fecha: seleccion.fecha,
       bloque: seleccion.bloque,
       estado: "activa",
@@ -243,7 +239,10 @@ const Index = () => {
       case "ocupado":
         return (
           <div className={`${base} border-destructive/40 bg-destructive/10 text-destructive`}>
-            <span className="truncate">{e.nombre}</span>
+            <span className="flex min-w-0 flex-col leading-tight">
+              <span className="truncate">{e.nombre}</span>
+              {e.placa && <span className="font-mono text-xs font-semibold">{e.placa}</span>}
+            </span>
           </div>
         );
       case "mia":
@@ -256,7 +255,10 @@ const Index = () => {
       default:
         return (
           <div className={`${base} bg-muted text-muted-foreground`}>
-            <span className="truncate">{e.mia ? "Tú" : (e.nombre ?? "Sin uso")}</span>
+            <span className="flex min-w-0 flex-col leading-tight">
+              <span className="truncate">{e.mia ? "Tú" : (e.nombre ?? "Sin uso")}</span>
+              {!e.mia && e.placa && <span className="font-mono text-xs">{e.placa}</span>}
+            </span>
           </div>
         );
     }
@@ -409,7 +411,7 @@ const Index = () => {
                 </div>
                 <div>
                   <Label htmlFor="nombre">Tu nombre</Label>
-                  <Input id="nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} />
+                  <Input id="nombre" value={nombre} readOnly disabled />
                 </div>
                 <div className="flex gap-2">
                   <Button onClick={confirmar} disabled={enviando} className="flex-1">
