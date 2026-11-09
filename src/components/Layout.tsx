@@ -1,13 +1,20 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Zap, LogOut, CalendarCheck, Home, Search } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { Zap, LogOut, CalendarCheck, Home, Search, BarChart3 } from "lucide-react";
 
 export const Layout = ({ children }: { children: ReactNode }) => {
   const { user, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [esAdmin, setEsAdmin] = useState(false);
+  const email = user?.email;
+  useEffect(() => {
+    if (!email) { setEsAdmin(false); return; }
+    supabase.rpc("es_admin").then(({ data }) => setEsAdmin(data === true));
+  }, [email]);
 
   const handleLogout = async () => {
     await signOut();
@@ -50,6 +57,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
               <NavItem to="/" icon={Home} label="Inicio" />
               <NavItem to="/mis-reservas" icon={CalendarCheck} label="Mis reservas" />
               <NavItem to="/usuarios" icon={Search} label="Buscar placa" />
+              {esAdmin && <NavItem to="/estadisticas" icon={BarChart3} label="Estadísticas" />}
               <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2">
                 <LogOut className="h-4 w-4" />
                 <span className="hidden sm:inline">Salir</span>

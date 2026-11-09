@@ -123,7 +123,7 @@ describe("buscador de placa", () => {
     rpc.mockClear();
     buscar("AB");
     await screen.findByText(/\(6 caracteres\)/);
-    expect(rpc).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalledWith("buscar_placa", expect.anything());
   });
 
   it("avisa cuando la placa no está registrada", async () => {
