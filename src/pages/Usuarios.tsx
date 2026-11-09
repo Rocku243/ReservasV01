@@ -1,85 +1,122 @@
-import { useEffect, useState } from "react";
-import { Layout } from "@/components/Layout";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { supabase, type Perfil } from "@/lib/supabase";
-import { useAuth } from "@/context/AuthContext";
+import { useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Users as UsersIcon } from "lucide-react";
+import { Phone, Search, SearchX } from "lucide-react";
+import { Layout } from "@/components/Layout";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { supabase, type ResultadoPlaca } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 
-export default function Usuarios() {
+const normalizar = (valor: string) => valor.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+
+export default function BuscarPlaca() {
   const { user, loading: authLoading } = useAuth();
-  const [perfiles, setPerfiles] = useState<Perfil[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    (async () => {
-      const { data, error } = await supabase
-        .from("perfiles")
-        .select("id, nombre, celular, placa, tipo_cargador")
-        .order("nombre", { ascending: true });
-      if (!error && data) setPerfiles(data as Perfil[]);
-      setLoading(false);
-    })();
-  }, []);
+  const [placa, setPlaca] = useState("");
+  const [buscando, setBuscando] = useState(false);
+  const [resultados, setResultados] = useState<ResultadoPlaca[] | null>(null);
+  const [consultada, setConsultada] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   if (!authLoading && !user) return <Navigate to="/auth" replace />;
 
+  const buscar = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const limpia = normalizar(placa);
+    setResultados(null);
+    if (limpia.length !== 6) {
+      setError("Escribe la placa completa (6 caracteres), por ejemplo ABC123.");
+      return;
+    }
+    setError(null);
+    setBuscando(true);
+    const { data, error: rpcError } = await supabase.rpc("buscar_placa", { p_placa: limpia });
+    setBuscando(false);
+    if (rpcError) {
+      setError(rpcError.message);
+      return;
+    }
+    setConsultada(limpia);
+    setResultados((data ?? []) as ResultadoPlaca[]);
+  };
+
   return (
     <Layout>
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
           <div className="bg-gradient-primary p-2 rounded-lg shadow-elegant">
-            <UsersIcon className="h-5 w-5 text-primary-foreground" />
+            <Search className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Usuarios</h1>
+            <h1 className="text-2xl font-bold text-foreground">Buscar placa</h1>
             <p className="text-sm text-muted-foreground">
-              Listado de usuarios registrados
+              Consulta el nombre y el celular de quien tiene registrada una placa
             </p>
           </div>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Perfiles</CardTitle>
-            <CardDescription>
-              {perfiles.length} usuario{perfiles.length === 1 ? "" : "s"} registrado{perfiles.length === 1 ? "" : "s"}
-            </CardDescription>
+            <CardTitle className="text-lg">Placa del vehículo</CardTitle>
+            <CardDescription>Escribe la placa completa. Solo se muestran resultados exactos.</CardDescription>
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <p className="text-sm text-muted-foreground">Cargando...</p>
-            ) : perfiles.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No hay usuarios registrados.</p>
-            ) : (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>#</TableHead>
-                      <TableHead>Nombre completo</TableHead>
-                      <TableHead>Celular</TableHead>
-                      <TableHead>Placa</TableHead>
-                      <TableHead>Tipo de cargador</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {perfiles.map((p, index) => (
-                      <TableRow key={p.id}>
-                        <TableCell className="text-muted-foreground">{index + 1}</TableCell>
-                        <TableCell className="font-medium">{p.nombre || "—"}</TableCell>
-                        <TableCell>{p.celular || "—"}</TableCell>
-                        <TableCell className="uppercase">{p.placa || "—"}</TableCell>
-                        <TableCell>{p.tipo_cargador || "—"}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+            <form onSubmit={buscar} className="space-y-4">
+              <div>
+                <Label htmlFor="placa">Placa</Label>
+                <Input
+                  id="placa"
+                  value={placa}
+                  onChange={(e) => setPlaca(e.target.value.toUpperCase())}
+                  placeholder="ABC123"
+                  maxLength={8}
+                  autoComplete="off"
+                  className="uppercase tracking-wider"
+                />
               </div>
-            )}
+              {error && <p className="text-sm text-destructive">{error}</p>}
+              <Button type="submit" className="w-full" disabled={buscando}>
+                {buscando ? "Buscando..." : "Buscar"}
+              </Button>
+            </form>
           </CardContent>
         </Card>
+
+        {resultados && resultados.length === 0 && (
+          <Card>
+            <CardContent className="py-8 text-center space-y-2">
+              <SearchX className="h-8 w-8 mx-auto text-muted-foreground" />
+              <p className="font-medium">La placa {consultada} no está registrada.</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {resultados && resultados.length > 0 && (
+          <div className="space-y-3">
+            {resultados.map((r, i) => (
+              <Card key={`${r.placa}-${i}`} className="shadow-card">
+                <CardContent className="py-4 space-y-2">
+                  <div className="text-lg font-semibold">{r.nombre || "—"}</div>
+                  <div className="text-sm text-muted-foreground">
+                    Placa <span className="uppercase font-medium text-foreground">{r.placa}</span>
+                  </div>
+                  {r.celular ? (
+                    <a
+                      href={`tel:${r.celular}`}
+                      className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+                    >
+                      <Phone className="h-4 w-4" aria-hidden="true" />
+                      {r.celular}
+                    </a>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">Sin celular registrado</div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </Layout>
   );

@@ -1,57 +1,55 @@
 import { addDays, startOfDay, format } from "date-fns";
 
+export type Bloque = "mañana" | "tarde";
+
+export const BLOQUES: Bloque[] = ["mañana", "tarde"];
+export const HORARIO_BLOQUE: Record<Bloque, string> = {
+  mañana: "6:00 a. m. – 12:00 m.",
+  tarde: "12:00 m. – 6:00 p. m.",
+};
+export const NOMBRES_DIAS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+export const DIAS_CORTOS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+
 /**
  * Hora actual en Colombia (UTC-5), independiente de la zona del navegador.
+ * El Date devuelto tiene la hora de pared de Colombia en sus getters locales.
  */
-function ahoraColombia(now: Date = new Date()): Date {
+export function ahoraColombia(now: Date = new Date()): Date {
   const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
   return new Date(utcMs - 5 * 60 * 60000);
 }
 
-/**
- * Devuelve los 7 días (sábado→viernes) de la semana activa de reservas.
- *
- * Regla: tomamos el viernes 14:00 (hora Colombia) más reciente que ya pasó.
- * La semana activa es el sábado siguiente a ese viernes hasta el viernes +6 días.
- *
- * Ej: viernes 1 may 14:00 → semana sáb 2 may → vie 8 may.
- *     viernes 8 may 13:59 → aún sáb 2 → vie 8 may.
- *     viernes 8 may 14:00 → semana sáb 9 → vie 15 may.
- */
-export function getSemanaReservable(now: Date = new Date()): Date[] {
-  const co = ahoraColombia(now);
-  const dia = co.getDay(); // 0=Dom .. 5=Vie .. 6=Sab
-  const hora = co.getHours();
+/** Sábado de la semana (sábado → viernes) que contiene la fecha dada. */
+function inicioSemana(d: Date): Date {
+  return startOfDay(addDays(d, -((d.getDay() + 1) % 7)));
+}
 
-  // Calcular días desde el último "viernes 14:00 ya cumplido"
-  // Si hoy es viernes y ya pasaron las 14:00 → último viernes activador = hoy
-  // Si hoy es viernes y aún no son las 14:00 → último activador = viernes pasado (hace 7 días)
-  // Otro día → buscar el viernes anterior
-  let diasDesdeUltimoViernesActivador: number;
-  if (dia === 5) {
-    diasDesdeUltimoViernesActivador = hora >= 14 ? 0 : 7;
-  } else {
-    // distancia hacia atrás hasta el viernes (5)
-    // dom=0 → 2, sáb=6 → 1, lun=1 → 3, mar=2 → 4, mié=3 → 5, jue=4 → 6
-    diasDesdeUltimoViernesActivador = ((dia - 5 + 7) % 7);
-  }
+const sieteDias = (inicio: Date) => Array.from({ length: 7 }, (_, i) => addDays(inicio, i));
 
-  const inicioSemanaCo = startOfDay(addDays(co, -diasDesdeUltimoViernesActivador + 1)); // sábado
-  return Array.from({ length: 7 }, (_, i) => addDays(inicioSemanaCo, i));
+/** Los 7 días (sáb→vie) de la semana en curso, según la hora de Colombia. */
+export function semanaActual(now: Date = new Date()): Date[] {
+  return sieteDias(inicioSemana(ahoraColombia(now)));
+}
+
+/** Los 7 días (sáb→vie) de la semana siguiente. */
+export function semanaSiguiente(now: Date = new Date()): Date[] {
+  return sieteDias(addDays(inicioSemana(ahoraColombia(now)), 7));
 }
 
 /**
- * ¿Ya abrió la ventana de reservas para la semana mostrada?
- * False solo cuando es viernes antes de las 2pm (mostramos la semana en curso
- * pero la próxima aún no se habilita).
+ * La semana siguiente se habilita los viernes desde las 2:00 p. m. (hora Colombia).
+ * Desde el sábado esa semana pasa a ser la semana en curso.
  */
-export function ventanaAbierta(now: Date = new Date()): boolean {
+export function proximaSemanaAbierta(now: Date = new Date()): boolean {
   const co = ahoraColombia(now);
-  const dia = co.getDay();
-  const hora = co.getHours();
-  if (dia === 5 && hora < 14) return false;
-  return true;
+  return co.getDay() === 5 && co.getHours() >= 14;
+}
+
+/** ¿Ya terminó el bloque? (mañana termina a las 12:00, tarde a las 18:00, hora Colombia). */
+export function bloqueTerminado(fecha: string, bloque: Bloque, now: Date = new Date()): boolean {
+  const [y, m, d] = fecha.split("-").map(Number);
+  const fin = new Date(y, m - 1, d, bloque === "mañana" ? 12 : 18, 0, 0);
+  return ahoraColombia(now).getTime() >= fin.getTime();
 }
 
 export const formatFecha = (d: Date) => format(d, "yyyy-MM-dd");
-export const NOMBRES_DIAS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];

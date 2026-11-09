@@ -1,12 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/context/AuthContext";
 import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth.tsx";
-import Reservar from "./pages/Reservar.tsx";
 import MisReservas from "./pages/MisReservas.tsx";
 import Usuarios from "./pages/Usuarios.tsx";
 import ContrasenaOlvidada from "./pages/ContraseñaOlvidada.tsx";
@@ -31,7 +30,7 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<Auth />} />
-                  <Route path="/reservar/:id" element={<Reservar />} />
+                  <Route path="/reservar/:id" element={<Navigate to="/" replace />} />
                   <Route path="/mis-reservas" element={<MisReservas />} />
                   <Route path="/usuarios" element={<Usuarios />} />
                   <Route path="*" element={<NotFound />} />
