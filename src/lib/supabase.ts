@@ -14,9 +14,9 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 
 export type Conector = {
   id: number;
-  numero: number;
+  numero: string;
   tipo_conector: string | null;
-  ubicacion: string | null;
+  direccion?: string | null;
   estado: string | null;
 };
 
@@ -36,5 +36,23 @@ export type Reserva = {
   fecha: string;
   bloque: "mañana" | "tarde";
   estado: "activa" | "cancelada";
-  created_at?: string;
+  creada_en?: string;
+  cancelada_en?: string | null;
+};
+
+/** Fila que devuelve la función reservas_semana (no incluye correos). */
+export type ReservaSemana = {
+  id: number;
+  conector_id: number;
+  fecha: string;
+  bloque: "mañana" | "tarde";
+  usuario_nombre: string;
+  es_mia: boolean;
+};
+
+/** Fila que devuelve la función buscar_placa. */
+export type ResultadoPlaca = {
+  nombre: string;
+  placa: string;
+  celular: string;
 };
