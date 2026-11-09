@@ -6,6 +6,7 @@ import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAx
 import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/lib/supabase";
 import { ahoraColombia } from "@/lib/reservas";
 import { useAuth } from "@/context/AuthContext";
@@ -23,6 +24,16 @@ type Estadisticas = {
   por_semana: { semana: string; activas: number; canceladas: number }[];
 };
 
+type UsuarioStat = {
+  nombre: string;
+  placa: string | null;
+  reservas: number;
+  canceladas: number;
+  manana: number;
+  tarde: number;
+  ultima: string | null;
+};
+
 const DIAS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 const RANGOS = [
   { id: "4s", label: "Últimas 4 semanas", dias: 28 },
@@ -37,6 +48,8 @@ export default function EstadisticasPage() {
   const [esAdmin, setEsAdmin] = useState<boolean | null>(null);
   const [rango, setRango] = useState<(typeof RANGOS)[number]["id"]>("12s");
   const [datos, setDatos] = useState<Estadisticas | null>(null);
+  const [usuarios, setUsuarios] = useState<UsuarioStat[]>([]);
+  const [filtro, setFiltro] = useState("");
   const [error, setError] = useState<string | null>(null);
   const email = user?.email;
 
@@ -55,6 +68,9 @@ export default function EstadisticasPage() {
     supabase.rpc("estadisticas", { p_desde: desde, p_hasta: hasta }).then(({ data, error: err }) => {
       if (err) setError(err.message);
       else setDatos(data as Estadisticas);
+    });
+    supabase.rpc("estadisticas_usuarios", { p_desde: desde, p_hasta: hasta }).then(({ data }) => {
+      setUsuarios((data as UsuarioStat[]) ?? []);
     });
   }, [esAdmin, rango]);
 
@@ -101,7 +117,7 @@ export default function EstadisticasPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold">Estadísticas de uso</h1>
-          <p className="text-sm text-muted-foreground">Solo visible para administradores. Datos agregados, sin información personal.</p>
+          <p className="text-sm text-muted-foreground">Solo visible para administradores. Las gráficas son agregadas; la tabla por usuario muestra nombre y placa, nunca el correo.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {RANGOS.map((r) => (
@@ -168,6 +184,55 @@ export default function EstadisticasPage() {
                 <Bar dataKey="reservas" name="Reservas" fill="hsl(var(--primary))" />
               </BarChart>,
             )}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Uso por usuario</CardTitle>
+                <CardDescription>
+                  {usuarios.length} usuarios con actividad en el periodo. Ordenado por reservas realizadas.
+                </CardDescription>
+                <Input
+                  placeholder="Filtrar por nombre o placa"
+                  value={filtro}
+                  onChange={(e) => setFiltro(e.target.value)}
+                  className="max-w-sm"
+                />
+              </CardHeader>
+              <CardContent className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b text-left text-muted-foreground">
+                      <th className="py-2 pr-3 font-medium">Nombre</th>
+                      <th className="py-2 pr-3 font-medium">Placa</th>
+                      <th className="py-2 pr-3 text-right font-medium">Reservas</th>
+                      <th className="py-2 pr-3 text-right font-medium">Mañana</th>
+                      <th className="py-2 pr-3 text-right font-medium">Tarde</th>
+                      <th className="py-2 pr-3 text-right font-medium">Canceladas</th>
+                      <th className="py-2 font-medium">Última</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {usuarios
+                      .filter((u) => {
+                        const q = filtro.trim().toLowerCase();
+                        return !q || u.nombre?.toLowerCase().includes(q) || u.placa?.toLowerCase().includes(q);
+                      })
+                      .map((u, i) => (
+                        <tr key={i} className="border-b last:border-0">
+                          <td className="py-2 pr-3">{u.nombre}</td>
+                          <td className="py-2 pr-3 font-mono text-xs">{u.placa ?? "—"}</td>
+                          <td className="py-2 pr-3 text-right font-semibold">{u.reservas}</td>
+                          <td className="py-2 pr-3 text-right">{u.manana}</td>
+                          <td className="py-2 pr-3 text-right">{u.tarde}</td>
+                          <td className="py-2 pr-3 text-right">{u.canceladas}</td>
+                          <td className="py-2">
+                            {u.ultima ? format(new Date(u.ultima + "T00:00"), "d MMM yyyy", { locale: es }) : "—"}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </CardContent>
+            </Card>
             <p className="text-xs text-muted-foreground">
               Las cancelaciones anteriores al 9 de noviembre de 2026 incluyen cambios de reserva hechos con la regla anterior, así que no equivalen a cupos que quedaron sin usar.
             </p>
